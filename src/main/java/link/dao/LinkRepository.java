@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import link.model.Link;
 
+
 @Repository
 public interface LinkRepository extends JpaRepository<Link, Long>{
 

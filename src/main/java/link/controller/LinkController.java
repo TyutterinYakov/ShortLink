@@ -1,22 +1,9 @@
 package link.controller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import link.model.Link;
 import link.service.LinkService;
 
 @RestController
@@ -53,14 +39,9 @@ public class LinkController {
 	}
 	
 	@PostMapping("/")
-	public String generateLink(@RequestParam("redirectLink") String redirectLink, 
-			@RequestParam(name="time", required = false) Double time, @RequestParam(name="key") String key, HttpServletRequest request) throws IOException {
-		try {
-			return host+linkService.saveOrGetLink(redirectLink, time, key, request);
-		} catch (NoSuchAlgorithmException e) {
-			logger.error("",e);
-			return "Error create link";
-		}
+	public ResponseEntity<String> generateLink(@RequestParam("redirectLink") String redirectLink, 
+			@RequestParam(name="time", required = false) Double time, @RequestParam(name="key") String key, HttpServletRequest request) throws IOException, NoSuchAlgorithmException {
+			return ResponseEntity.ok(host+linkService.saveOrGetLink(redirectLink, time, key, request));
 	}
 	
 	@GetMapping("/{generated}")
@@ -76,15 +57,20 @@ public class LinkController {
 	}
 	
 	@GetMapping("/{generated}/delete/{key}")
-	public void deleteLink(@PathVariable("generated") String generated, HttpServletRequest request, @PathVariable("key") String key) throws NotFoundException, NoSuchAlgorithmException{
+	public String deleteLink(@PathVariable("generated") String generated, HttpServletRequest request, @PathVariable("key") String key) throws NotFoundException, NoSuchAlgorithmException{
 		linkService.deleteLinkByGenerated(generated, request, key);
-		
+		return "Short link deleted";
 	}
 	
 	
 	@ExceptionHandler
-	public ResponseEntity<Void> notFoundException(NotFoundException ex){
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	public ResponseEntity<?> notFoundException(NotFoundException ex){
+		return new ResponseEntity<>("Такая ссылка отсутствует или ее срок действия истек",HttpStatus.NOT_FOUND);
+	}
+	@ExceptionHandler
+	public ResponseEntity<?> noSuchAlgorithmException(NoSuchAlgorithmException ex){
+		logger.error("",ex);
+		return new ResponseEntity<>("Ошибка на стороне сервера",HttpStatus.BAD_GATEWAY);
 	}
 	
 	

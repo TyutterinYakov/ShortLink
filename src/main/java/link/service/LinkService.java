@@ -2,7 +2,6 @@ package link.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -12,8 +11,6 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,7 +23,7 @@ import link.model.UniqueLinkClicks;
 @Service
 public class LinkService {
 	
-	private static Logger logger = LoggerFactory.getLogger(LinkService.class);
+//	private static Logger logger = LoggerFactory.getLogger(LinkService.class);
 	private final LinkRepository linkDao;
 	private final UniqueClicksRepository uniqueDao;
 
@@ -107,9 +104,11 @@ public class LinkService {
 	private static String sha1(String key, HttpServletRequest request) throws NoSuchAlgorithmException {
 		Map<String, Object> headers = new TreeMap<>();
 		request.getHeaderNames().asIterator().forEachRemaining((s)->{
-			headers.put(s, request.getHeader(s));
+			if(s.equals("user-agent")||s.equals("sec-ch-ua-platform")||s.equals("cookie")) {
+				headers.put(s, request.getHeader(s));
+			}
 		});
-		logger.info(headers.toString());
+//		logger.info(headers.toString());
 		StringBuilder strb = new StringBuilder(headers.toString().replaceAll(", ", "&"));
 		strb.append(strb.substring(1, strb.length()-1));
 		if(key!="") {
@@ -124,7 +123,7 @@ public class LinkService {
 	        	sb.append(String.format("%02X", b));
 	        }
 	        sha1=sb.toString();
-	        logger.info(sha1);
+//	        logger.info(sha1);
 	    return sha1;
 	}
 	
