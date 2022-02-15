@@ -1,11 +1,15 @@
 package link.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -16,22 +20,19 @@ public class Link {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long linkId;
 	private String linkRedirect;
-	private String secretKey;
+	private String userSha;
 	private String generatedValue;
 	private Long countClick=0L;
 	private Double time;
 	private LocalDateTime createDate=LocalDateTime.now();
+	@OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy="link")
+	private List<UniqueLinkClicks> uniques;
+	
 	public String getLinkRedirect() {
 		return linkRedirect;
 	}
 	public void setLinkRedirect(String linkRedirect) {
 		this.linkRedirect = linkRedirect;
-	}
-	public String getSecretKey() {
-		return secretKey;
-	}
-	public void setSecretKey(String secretKey) {
-		this.secretKey = secretKey;
 	}
 	public Long getLinkId() {
 		return linkId;
@@ -63,6 +64,20 @@ public class Link {
 	public void setCreateDate(LocalDateTime createDate) {
 		this.createDate = createDate;
 	}
+	public String getUserSha() {
+		return userSha;
+	}
+	public void setUserSha(String userSha) {
+		this.userSha = userSha;
+	}
+	public List<UniqueLinkClicks> getUniques() {
+		return uniques;
+	}
+	public void setUniques(List<UniqueLinkClicks> uniques) {
+		this.uniques = uniques;
+	}
+	
+	
 	
 	
 	

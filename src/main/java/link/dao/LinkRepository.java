@@ -15,5 +15,9 @@ public interface LinkRepository extends JpaRepository<Link, Long>{
 
 	Optional<Link> findByGeneratedValue(String generated);
 
+	Optional<Link> findByLinkRedirectAndUserSha(String href, String sha1);
+
+	Optional<Link> findByGeneratedValueAndUserSha(String generated, String sha1);
+
 	
 }
