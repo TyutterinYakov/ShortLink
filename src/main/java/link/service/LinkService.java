@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
@@ -35,20 +36,24 @@ public class LinkService {
 	}
 
 	
-	public String saveOrGetLink(String href, Double time, String key, HttpServletRequest request) throws NoSuchAlgorithmException {
+	public String saveOrGetLink(String href, Double time, String key, HttpServletRequest request) throws NoSuchAlgorithmException{
 		String sh1 = sha1(key, request);
-		Optional<Link> linkOptional = linkDao.findByLinkRedirectAndUserSha(href, sh1);
-		if(linkOptional.isPresent()) {
-			return linkOptional.get().getGeneratedValue();
+		try {
+			Link link = linkDao.findByLinkRedirectAndUserSha(href, sh1).get();
+			checkTimeLink(link);
+			return link.getGeneratedValue();
+		} catch (NotFoundException | NoSuchElementException e) {
+			Link link = new Link();
+			link.setGeneratedValue(getRandomString(5));
+			link.setLinkRedirect(href);
+			link.setUserSha(sh1);
+			if(time!=null) {
+				link.setTime(time);
+			}
+			return linkDao.save(link).getGeneratedValue();
 		}
-		Link link = new Link();
-		link.setGeneratedValue(getRandomString(5));
-		link.setLinkRedirect(href);
-		link.setUserSha(sh1);
-		if(time!=null) {
-			link.setTime(time);
-		}
-		return linkDao.save(link).getGeneratedValue();
+			
+
 	}
 
 
